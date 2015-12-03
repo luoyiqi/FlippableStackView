@@ -74,7 +74,7 @@ public class OrientedViewPager extends ViewGroup {
     }
 
     private static final String TAG = "ViewPager";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final boolean USE_CACHE = false;
 
@@ -357,8 +357,10 @@ public class OrientedViewPager extends ViewGroup {
                 mRestoredAdapterState = null;
                 mRestoredClassLoader = null;
             } else if (!wasFirstLayout) {
+                Log.v(TAG, "is NOT first layout");
                 populate();
             } else {
+                Log.v(TAG, "is first layout");
                 requestLayout();
             }
         }
@@ -921,6 +923,7 @@ public class OrientedViewPager extends ViewGroup {
             final int clientSize = getClientSize();
             final float topLeftSizeNeeded = clientSize <= 0 ? 0 :
                     2.f - curItem.sizeFactor + (float) getPaddingLeft() / (float) clientSize;
+            // R: Figure out extra size top left
             for (int pos = mCurItem - 1; pos >= 0; pos--) {
                 if (extraSizeTopLeft >= topLeftSizeNeeded && pos < startPos) {
                     if (ii == null) {
@@ -931,7 +934,7 @@ public class OrientedViewPager extends ViewGroup {
                         mAdapter.destroyItem(this, pos, ii.object);
                         if (DEBUG) {
                             Log.i(TAG, "populate() - destroyItem() with pos: " + pos +
-                                    " view: " + ((View) ii.object));
+                                    " view: " + (ii.object));
                         }
                         itemIndex--;
                         curIndex--;
@@ -965,7 +968,7 @@ public class OrientedViewPager extends ViewGroup {
                             mAdapter.destroyItem(this, pos, ii.object);
                             if (DEBUG) {
                                 Log.i(TAG, "populate() - destroyItem() with pos: " + pos +
-                                        " view: " + ((View) ii.object));
+                                        " view: " + (ii.object));
                             }
                             ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
                         }
@@ -1406,7 +1409,7 @@ public class OrientedViewPager extends ViewGroup {
                                 (int) (childHeightSize * lp.heightFactor), MeasureSpec.EXACTLY);
                         child.measure(mChildWidthMeasureSpec, heightSpec);
                     } else {
-
+                        Log.v(TAG, "width Factor: " + lp.widthFactor);
                         final int widthSpec = MeasureSpec.makeMeasureSpec(
                                 (int) (childWidthSize * lp.widthFactor), MeasureSpec.EXACTLY);
                         child.measure(widthSpec, mChildHeightMeasureSpec);
@@ -1549,7 +1552,7 @@ public class OrientedViewPager extends ViewGroup {
                             break;
                     }
                     if (mOrientation == Orientation.VERTICAL) {
-                        childTop += scroll;
+                        childTop += (scroll*(count - i + 1));
                     } else {
                         childLeft += scroll;
                     }
@@ -1559,6 +1562,10 @@ public class OrientedViewPager extends ViewGroup {
                     decorCount++;
                 }
             }
+        }
+
+        if (DEBUG) {
+            Log.v(TAG, "Decor count: %s" + Integer.toString(decorCount));
         }
 
         final int childSize = (mOrientation == Orientation.VERTICAL) ? height - paddingTop - paddingBottom : width - paddingLeft - paddingRight;
@@ -2134,10 +2141,10 @@ public class OrientedViewPager extends ViewGroup {
                     // Scroll to follow the motion event
                     final int activePointerIndex = MotionEventCompat.findPointerIndex(
                             ev, mActivePointerId);
-                    if (mOrientation == Orientation.VERTICAL) {
+                    /*if (mOrientation == Orientation.VERTICAL) {
                         final float y = MotionEventCompat.getY(ev, activePointerIndex);
                         needsInvalidate |= performDrag(y);
-                    } else {
+                    } else*/ {
                         final float x = MotionEventCompat.getX(ev, activePointerIndex);
                         needsInvalidate |= performDrag(x);
                     }

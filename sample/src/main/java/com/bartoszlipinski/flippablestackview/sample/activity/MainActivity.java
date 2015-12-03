@@ -59,9 +59,7 @@ public class MainActivity extends ActionBarActivity {
         boolean portrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         mFlippableStack = (FlippableStackView) findViewById(R.id.flippable_stack_view);
-        mFlippableStack.initStack(4, portrait ?
-                StackPageTransformer.Orientation.VERTICAL :
-                StackPageTransformer.Orientation.HORIZONTAL);
+        mFlippableStack.initStack(4, StackPageTransformer.Orientation.HORIZONTAL);
         mFlippableStack.setAdapter(mPageAdapter);
     }
 
