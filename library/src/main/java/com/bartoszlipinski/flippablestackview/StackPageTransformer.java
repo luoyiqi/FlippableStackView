@@ -156,7 +156,7 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
             view.setAlpha(1.0f + (position * mAlphaFactor));
 
             if(position == 0){
-                mZeroPageListener.zeroPageDimens(baseTranslation, yShiftTranslation/mZeroPositionScale);
+                mZeroPageListener.zeroPageDimens(baseTranslation, yShiftTranslation);
             }
 
             switch (mOrientation) {
