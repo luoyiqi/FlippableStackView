@@ -17,7 +17,6 @@
 package com.bartoszlipinski.flippablestackview;
 
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -70,6 +69,8 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
 
     private ValueInterpolator mValueInterpolator;
 
+    private OnZeroPageSelected mZeroPageListener;
+
     /**
      * Used to construct the basic method for visual transformation in <code>FlippableStackView</code>.
      *
@@ -93,7 +94,7 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
         mNumberOfStacked = numberOfStacked;
         mAlphaFactor = 1.0f / (mNumberOfStacked + 1);
         mZeroPositionScale = currentPageScale;
-        mStackedScaleFactor = (currentPageScale - topStackedScale) / mNumberOfStacked;
+        mStackedScaleFactor = (currentPageScale - topStackedScale)/ mNumberOfStacked;
         mOverlapFactor = overlapFactor;
         mOrientation = orientation;
         mGravity = gravity;
@@ -103,9 +104,14 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
         mValueInterpolator = new ValueInterpolator(0, 1, 0, mZeroPositionScale);
     }
 
+
+    public void setZeroPageSelectedListener(OnZeroPageSelected listener){
+        mZeroPageListener = listener;
+    }
+
     @Override
     public void transformPage(View view, float position) {
-        Log.v("TRANSFORMER:: ", Float.toString(position));
+
         int dimen = 0;
         switch (mOrientation) {
             case VERTICAL:
@@ -129,8 +135,8 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
                 break;
             case HORIZONTAL:
                 view.setRotationY(0);
-                view.setPivotX(dimen / 2f);
-                view.setPivotY(view.getHeight() / 2f);
+                //view.setPivotX(dimen / 2f);
+                //view.setPivotY(view.getHeight() / 2f);
                 break;
         }
 
@@ -139,13 +145,20 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
         } else if (position <= 0) {
             float scale = mZeroPositionScale + (position * mStackedScaleFactor);
             float baseTranslation = (-position * dimen);
+
             float yShiftTranslation = calculateShiftForScale(position, scale, view.getHeight());
             float shiftTranslation = calculateShiftForScale(position, scale, dimen);
-            view.setPivotX(dimen/2);
-            view.setPivotY(view.getHeight()/2);
+
+            //view.setPivotX(dimen/2);
+            //view.setPivotY(view.getHeight()/2);
             view.setScaleX(scale);
             view.setScaleY(scale);
             view.setAlpha(1.0f + (position * mAlphaFactor));
+
+            if(position == 0){
+                mZeroPageListener.zeroPageDimens(baseTranslation, yShiftTranslation);
+            }
+
             switch (mOrientation) {
                 case VERTICAL:
                     view.setTranslationY(baseTranslation + shiftTranslation);
@@ -174,13 +187,13 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
                     view.setTranslationY(-baseTranslation - mBelowStackSpace - shiftTranslation);
                     break;
                 case HORIZONTAL:
-                    view.setPivotX(dimen);
+                    //view.setPivotX(dimen);
                     //view.setPivotY(view.getHeight());
-                    // view.setRotationY(-rotation);
+                    //view.setRotationY(-rotation);
                     view.setScaleY(mZeroPositionScale);
-                    view.setScaleX(scale);
-                    view.setTranslationX(-baseTranslation + shiftTranslation);
-                    view.setTranslationY(-baseTranslation - mBelowStackSpace + shiftTranslation);
+                    view.setScaleX(mZeroPositionScale);
+                    //view.setTranslationX(-baseTranslation + shiftTranslation);
+                    //view.setTranslationY(-baseTranslation - mBelowStackSpace + shiftTranslation);
                     break;
             }
         } else if (position > 1) {
@@ -203,18 +216,23 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
                 break;
             case CENTER:
                 mAboveStackSpace = availableSpaceUnit / 5;
-                mBelowStackSpace = 0;//2 * availableSpaceUnit;// / 5;
+                mBelowStackSpace = 0;//2 * availableSpaceUnit;
                 break;
             case BOTTOM:
                 mAboveStackSpace = 2 * availableSpaceUnit;
                 mBelowStackSpace = 0;
                 break;
+
         }
     }
 
-    private float calculateShiftForScale(float position, float scale, int dimen) {
+    public float calculateShiftForScale(float position, float scale, int dimen) {
         //difference between centers
         return mAboveStackSpace - ((mNumberOfStacked + position) * mOverlap) - (dimen * 0.5f * (scale - 1));
+    }
+
+    public float getmZeroPositionScale() {
+        return mZeroPositionScale;
     }
 
     private void validateValues(float currentPageScale, float topStackedScale, float overlapFactor) {
