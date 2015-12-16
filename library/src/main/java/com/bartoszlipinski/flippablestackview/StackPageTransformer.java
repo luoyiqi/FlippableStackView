@@ -69,8 +69,6 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
 
     private ValueInterpolator mValueInterpolator;
 
-    private OnZeroPageSelected mZeroPageListener;
-
     /**
      * Used to construct the basic method for visual transformation in <code>FlippableStackView</code>.
      *
@@ -104,10 +102,6 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
         mValueInterpolator = new ValueInterpolator(0, 1, 0, mZeroPositionScale);
     }
 
-
-    public void setZeroPageSelectedListener(OnZeroPageSelected listener){
-        mZeroPageListener = listener;
-    }
 
     @Override
     public void transformPage(View view, float position) {
@@ -154,10 +148,6 @@ public class StackPageTransformer implements ViewPager.PageTransformer {
             view.setScaleX(scale);
             view.setScaleY(scale);
             view.setAlpha(1.0f + (position * mAlphaFactor));
-
-            if(position == 0){
-                mZeroPageListener.zeroPageDimens(baseTranslation, yShiftTranslation);
-            }
 
             switch (mOrientation) {
                 case VERTICAL:

@@ -91,8 +91,4 @@ public class FlippableStackView extends OrientedViewPager {
         setDisableSwipe(status);
     }
 
-    public void setZeroPageListener(OnZeroPageSelected listener){
-        StackPageTransformer transformer = (StackPageTransformer) getPagerTransformer();
-        transformer.setZeroPageSelectedListener(listener);
-    }
 }
