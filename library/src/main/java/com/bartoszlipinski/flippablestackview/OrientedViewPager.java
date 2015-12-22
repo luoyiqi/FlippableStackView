@@ -66,7 +66,7 @@ import java.util.Comparator;
 /**
  * Created by Bartosz Lipinski
  * Based on castorflex's VerticalViewPager (https://github.com/castorflex/VerticalViewPager)
- * <p>
+ * <p/>
  * 03.05.15
  */
 public class OrientedViewPager extends ViewGroup {
@@ -74,6 +74,13 @@ public class OrientedViewPager extends ViewGroup {
     public enum Orientation {
         VERTICAL, HORIZONTAL
     }
+
+    public enum SwipeDirection {
+        ALL, LEFT, RIGHT, NONE;
+    }
+
+    private float initialXValue;
+    private SwipeDirection direction;
 
     private static final String TAG = "ViewPager";
     private static final boolean DEBUG = true;
@@ -160,7 +167,6 @@ public class OrientedViewPager extends ViewGroup {
 
     private boolean mIsBeingDragged;
     private boolean mIsUnableToDrag;
-    private boolean mDisableSwipe;
     private boolean mIgnoreGutter;
     private int mDefaultGutterSize;
     private int mGutterSize;
@@ -272,6 +278,9 @@ public class OrientedViewPager extends ViewGroup {
     }
 
     void initViewPager() {
+
+        this.direction = SwipeDirection.ALL;
+
         setWillNotDraw(false);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setFocusable(true);
@@ -1861,10 +1870,6 @@ public class OrientedViewPager extends ViewGroup {
         }
     }
 
-    public void setDisableSwipe(boolean mDisableSwipe) {
-        this.mDisableSwipe = mDisableSwipe;
-    }
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
@@ -2068,11 +2073,47 @@ public class OrientedViewPager extends ViewGroup {
         return mIsBeingDragged;
     }
 
+    private boolean isSwipeAllowed(MotionEvent event) {
+
+        if (this.direction == SwipeDirection.ALL) return true;
+
+        if (direction == SwipeDirection.NONE) return false;
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            initialXValue = event.getX();
+            return true;
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            try {
+                float diffX = event.getX() - initialXValue;
+                if (diffX > 0 && direction == SwipeDirection.RIGHT) {
+                    // swipe from left to right detected
+                    return false;
+                } else if (diffX < 0 && direction == SwipeDirection.LEFT) {
+                    // swipe from right to left detected
+                    return false;
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+
+        return true;
+    }
+
+
+    public void setAllowedSwipeDirection(SwipeDirection direction) {
+        this.direction = direction;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
 
-        // Disable swiping behaviour
-        if (mDisableSwipe) return true;
+        boolean isSwipeAllowed = isSwipeAllowed(ev);
+
+        if (!isSwipeAllowed)
+            return !isSwipeAllowed;
 
         if (mFakeDragging) {
             // A fake drag is in progress already, ignore this real one
@@ -2613,13 +2654,13 @@ public class OrientedViewPager extends ViewGroup {
 
     /**
      * Start a fake drag of the pager.
-     * <p>
+     * <p/>
      * <p>A fake drag can be useful if you want to synchronize the motion of the ViewPager
      * with the touch scrolling of another view, while still letting the ViewPager
      * control the snapping motion and fling behavior. (e.g. parallax-scrolling tabs.)
      * Call {@link #fakeDragBy(float)} to simulate the actual drag motion. Call
      * {@link #endFakeDrag()} to complete the fake drag and fling as necessary.
-     * <p>
+     * <p/>
      * <p>During a fake drag the ViewPager will ignore all touch events. If a real drag
      * is already in progress, this method will return false.
      *
