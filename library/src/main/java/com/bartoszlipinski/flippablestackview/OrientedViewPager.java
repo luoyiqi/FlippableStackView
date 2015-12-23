@@ -1877,6 +1877,9 @@ public class OrientedViewPager extends ViewGroup {
          * If we return true, onMotionEvent will be called and we do the actual
          * scrolling there.
          */
+        if (direction == SwipeDirection.NONE) {
+            return false;
+        }
 
         final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
 
