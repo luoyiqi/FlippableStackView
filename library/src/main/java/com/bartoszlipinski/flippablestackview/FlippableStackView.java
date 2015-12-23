@@ -86,9 +86,4 @@ public class FlippableStackView extends OrientedViewPager {
         super.setAdapter(adapter);
         setCurrentItem(adapter.getCount() - 1);
     }
-
-    public void disableSwipe(boolean status){
-        setDisableSwipe(status);
-    }
-
 }
