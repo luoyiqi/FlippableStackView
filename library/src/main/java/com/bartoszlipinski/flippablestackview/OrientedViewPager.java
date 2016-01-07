@@ -1971,6 +1971,11 @@ public class OrientedViewPager extends ViewGroup {
                 } else {
                     final float x = MotionEventCompat.getX(ev, pointerIndex);
                     final float dx = x - mLastMotionX;
+                    boolean allowSwipe = false;
+                    if ((dx < 0 && direction == SwipeDirection.LEFT) || (dx > 0 && direction == SwipeDirection.RIGHT) || direction == SwipeDirection.ALL) {
+                        allowSwipe = true;
+                    }
+                    Log.v(TAG, "Swipe allowed " + String.valueOf(allowSwipe));
                     final float xDiff = Math.abs(dx);
                     final float y = MotionEventCompat.getY(ev, pointerIndex);
                     final float yDiff = Math.abs(y - mInitialMotionY);
@@ -1985,7 +1990,7 @@ public class OrientedViewPager extends ViewGroup {
                         mIsUnableToDrag = true;
                         return false;
                     }
-                    if (xDiff > mTouchSlop && xDiff * 0.5f > yDiff) {
+                    if (xDiff > mTouchSlop && xDiff * 0.5f > yDiff && allowSwipe) {
                         if (DEBUG) Log.v(TAG, "Starting drag!");
                         mIsBeingDragged = true;
                         requestParentDisallowInterceptTouchEvent(true);
@@ -2044,7 +2049,7 @@ public class OrientedViewPager extends ViewGroup {
                         mScroller.abortAnimation();
                         mPopulatePending = false;
                         populate();
-                        mIsBeingDragged = true;
+                        mIsBeingDragged = false;
                         requestParentDisallowInterceptTouchEvent(true);
                         setScrollState(SCROLL_STATE_DRAGGING);
                     } else {
@@ -2162,7 +2167,13 @@ public class OrientedViewPager extends ViewGroup {
                     final float y = MotionEventCompat.getY(ev, pointerIndex);
                     final float yDiff = Math.abs(y - mLastMotionY);
                     final float x = MotionEventCompat.getX(ev, pointerIndex);
-                    final float xDiff = Math.abs(x - mLastMotionX);
+                    final float dx = x - mLastMotionX;
+                    final float xDiff = Math.abs(dx);
+                    boolean allowSwipe = false;
+                    if ((dx < 0 && direction == SwipeDirection.LEFT) || (dx > 0 && direction == SwipeDirection.RIGHT) || direction == SwipeDirection.ALL) {
+                        allowSwipe = true;
+                    }
+                    Log.v(TAG, "Swipe allowed " + String.valueOf(allowSwipe));
                     if (DEBUG)
                         Log.v(TAG, "Moved x to " + x + "," + y + " diff=" + xDiff + "," + yDiff);
                     if (mOrientation == Orientation.VERTICAL) {
